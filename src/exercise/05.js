@@ -13,23 +13,28 @@ export function useIdle(ms, eventTypes = activityEvents) {
   const [isIdle, setIsIdle] = useState(false);
 
   useEffect(() => {
-    let interval = setTimeout(() => setIsIdle(true), ms);
+    // Set a timeout to change isIdle to true after 'ms' milliseconds
+    let timeoutId = setTimeout(() => setIsIdle(true), ms);
 
+    // Function to reset idle state and clear timeout
     function setActive() {
       setIsIdle(false);
-      clearTimeout(interval);
-      interval = setTimeout(() => setIsIdle(true), ms);
+      clearTimeout(timeoutId);
+      // Reset timeout for the next idle period
+      timeoutId = setTimeout(() => setIsIdle(true), ms);
     }
 
+    // Add event listeners for each specified event type to reset idle state
     for (const type of eventTypes) {
       window.addEventListener(type, setActive);
     }
 
+    // Cleanup function to remove event listeners and clear timeout
     return function cleanup() {
       for (const type of eventTypes) {
         window.removeEventListener(type, setActive);
       }
-      clearTimeout(interval);
+      clearTimeout(timeoutId);
     };
   }, [ms, eventTypes]);
 
